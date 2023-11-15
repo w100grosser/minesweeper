@@ -15,6 +15,8 @@ if not os.path.exists(base_dir):
 
 # Neural Network parameters
 shape = (10, 10)
+batch_size = 32
+epochs = 10
 input_dim = 2 * shape[0] * shape[1]
 hidden_dim = 2048
 output_dim = shape[0] * shape[1]
@@ -27,12 +29,8 @@ target_files = sorted(glob.glob(os.path.join("dataset", 'target_*.npy')))
 assert len(input_files) == len(target_files)
 
 # Initialize weights
-# W1 = np.random.randn(input_dim, hidden_dim)
-# W1 = np.random.randn(input_dim, hidden_dim) * np.sqrt(2 / (input_dim + hidden_dim))
 W1 = np.random.randn(input_dim, hidden_dim) * np.sqrt(2 / input_dim)
 b1 = np.zeros((1, hidden_dim))
-# W2 = np.random.randn(hidden_dim, output_dim)
-# W2 = np.random.randn(hidden_dim, output_dim) * np.sqrt(2 / (hidden_dim + output_dim))
 W2 = np.random.randn(hidden_dim, output_dim) * np.sqrt(2 / hidden_dim)
 b2 = np.zeros((1, output_dim))
 
@@ -61,13 +59,6 @@ def neural_network(X, W1, b1, W2, b2):
     z2 = anp.dot(a1, W2) + b2
     return sigmoid(z2)
 
-# Loss function
-# def loss(W1, b1, W2, b2, X, Y):
-#     X = X.flatten()
-#     Y = Y.flatten()
-#     predictions = neural_network(X, W1, b1, W2, b2)
-#     return anp.mean((predictions - Y)**2)
-
 def loss(W1, b1, W2, b2, X, Y):
     X = X.flatten()
     Y = Y.flatten()
@@ -75,17 +66,12 @@ def loss(W1, b1, W2, b2, X, Y):
     return binary_crossentropy(predictions, Y)
 
 # Compute gradient
-# loss_gradient = grad(loss, argnums=[0, 1, 2, 3])
 grad_W1 = grad(loss, 0)
 grad_b1 = grad(loss, 1)
 grad_W2 = grad(loss, 2)
 grad_b2 = grad(loss, 3)
 
-
 loss_total = 0
-
-batch_size = 32
-epochs = 10
 
 # Training loop
 for epoch in range(epochs):
@@ -110,6 +96,7 @@ for epoch in range(epochs):
         b1 -= learning_rate * db1 / batch_size
         W2 -= learning_rate * dW2 / batch_size
         b2 -= learning_rate * db2 / batch_size
+        
         # calculate running average loss
         if batch == 0:
             running_loss = batch_loss/batch_size
@@ -120,6 +107,7 @@ for epoch in range(epochs):
             tqdm.write(f"Epoch {epoch}, Batch: {batch}, Loss: {running_loss}")
 
     if (epoch) % 2 == 0:
+
         # Create a directory for this epoch
         epoch_dir = os.path.join(base_dir, f'epoch_{epoch+1}')
         os.makedirs(epoch_dir)
@@ -136,7 +124,3 @@ np.save('W1.npy', W1)
 np.save('b1.npy', b1)
 np.save('W2.npy', W2)
 np.save('b2.npy', b2)
-
-# Prediction
-def predict(X):
-    return neural_network(X, W1, b1, W2, b2)
