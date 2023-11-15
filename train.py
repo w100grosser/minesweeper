@@ -20,13 +20,20 @@ epochs = 10
 input_dim = 2 * shape[0] * shape[1]
 hidden_dim = 2048
 output_dim = shape[0] * shape[1]
-learning_rate = 10
+learning_rate = 20
 num_mines = 15
 
-input_files = sorted(glob.glob(os.path.join("dataset", 'input_*.npy')))
-target_files = sorted(glob.glob(os.path.join("dataset", 'target_*.npy')))
+train_input_files = sorted(glob.glob(os.path.join("datasetnew/train", 'input_*.npy')))
+train_target_files = sorted(glob.glob(os.path.join("datasetnew/train", 'target_*.npy')))
+assert len(train_target_files) == len(train_input_files)
 
-assert len(input_files) == len(target_files)
+test_input_files = sorted(glob.glob(os.path.join("datasetnew/test", 'input_*.npy')))
+test_target_files = sorted(glob.glob(os.path.join("datasetnew/test", 'target_*.npy')))
+assert len(test_input_files) == len(test_target_files)
+
+val_input_files = sorted(glob.glob(os.path.join("datasetnew/val", 'input_*.npy')))
+val_target_files = sorted(glob.glob(os.path.join("datasetnew/val", 'target_*.npy')))
+assert len(val_input_files) == len(val_target_files)
 
 # Initialize weights
 W1 = np.random.randn(input_dim, hidden_dim) * np.sqrt(2 / input_dim)
@@ -35,15 +42,19 @@ W2 = np.random.randn(hidden_dim, output_dim) * np.sqrt(2 / hidden_dim)
 b2 = np.zeros((1, output_dim))
 
 # load weights if they exist
-# if os.path.exists('W1.npy'):
-#     W1 = np.load('W1.npy')
-#     b1 = np.load('b1.npy')
-#     W2 = np.load('W2.npy')
-#     b2 = np.load('b2.npy')
+if os.path.exists('W1.npy'):
+    W1 = np.load('W1.npy')
+    b1 = np.load('b1.npy')
+    W2 = np.load('W2.npy')
+    b2 = np.load('b2.npy')
 
 # Activation function
 def sigmoid(x):
     return 1 / (1 + anp.exp(-x))
+
+# Activation function
+def relu(x):
+    return anp.maximum(0, x)
 
 def binary_crossentropy(predictions, targets):
     epsilon = 1e-15  # To prevent log(0)
@@ -55,7 +66,7 @@ def binary_crossentropy(predictions, targets):
 def neural_network(X, W1, b1, W2, b2):
     X = X.flatten()
     z1 = anp.dot(X, W1) + b1
-    a1 = sigmoid(z1)
+    a1 = relu(z1)
     z2 = anp.dot(a1, W2) + b2
     return sigmoid(z2)
 
@@ -75,13 +86,13 @@ loss_total = 0
 
 # Training loop
 for epoch in range(epochs):
-    for batch in tqdm(range(len(input_files)//batch_size), desc=f"Epoch {epoch}", total=len(input_files)//batch_size):
+    for batch in tqdm(range(len(train_input_files)//batch_size), desc=f"Epoch {epoch}", total=len(train_input_files)//batch_size):
         dW1 = 0
         db1 = 0
         dW2 = 0
         db2 = 0
         batch_loss = 0
-        for input_file, target_file in zip(input_files[batch*batch_size: (batch + 1)*batch_size ], target_files[batch*batch_size: (batch + 1)*batch_size ]):
+        for input_file, target_file in zip(train_input_files[batch*batch_size: (batch + 1)*batch_size ], train_target_files[batch*batch_size: (batch + 1)*batch_size ]):
             input_data, output_data = np.load(input_file), np.load(target_file)
 
             dW1 += grad_W1(W1, b1, W2, b2, input_data, output_data)
@@ -106,11 +117,19 @@ for epoch in range(epochs):
         if (batch) % 50 == 0:
             tqdm.write(f"Epoch {epoch}, Batch: {batch}, Loss: {running_loss}")
 
+    # try out the model on the test set
+    test_loss = 0
+    for input_file, target_file in tqdm(zip(test_input_files, test_target_files), desc="Testing", total=len(test_input_files)):
+        input_data, output_data = np.load(input_file), np.load(target_file)
+        test_loss += loss(W1, b1, W2, b2, input_data, output_data)
+    test_loss /= len(test_input_files)
+    tqdm.write(f"Test Loss: {test_loss}")
+
     if (epoch) % 2 == 0:
 
         # Create a directory for this epoch
         epoch_dir = os.path.join(base_dir, f'epoch_{epoch+1}')
-        os.makedirs(epoch_dir)
+        os.makedirs(epoch_dir, exist_ok=True)
 
         # Save the weights in this directory
         np.save(os.path.join(epoch_dir, 'W1.npy'), W1)

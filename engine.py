@@ -114,6 +114,7 @@ class Minesweeper:
         Args:
             num_reveals (int): Number of random border cells to reveal.
         """
+        random_index = None
         for i in range(num_reveals):
 
             indicies = []

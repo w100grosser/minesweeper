@@ -60,6 +60,10 @@ def visualize_board(game, flag=np.zeros((10,10))):
 def sigmoid(x):
     return 1 / (1 + anp.exp(-x))
 
+# Activation function
+def relu(x):
+    return anp.maximum(0, x)
+
 def binary_crossentropy(predictions, targets):
     epsilon = 1e-15  # To prevent log(0)
     predictions = anp.clip(predictions, epsilon, 1 - epsilon)
@@ -68,11 +72,9 @@ def binary_crossentropy(predictions, targets):
 
 # Neural Network forward pass
 def neural_network(X, W1, b1, W2, b2):
-    print(X.shape)
     X = X.flatten()
-    print(X.shape)
     z1 = anp.dot(X, W1) + b1
-    a1 = sigmoid(z1)
+    a1 = relu(z1)
     z2 = anp.dot(a1, W2) + b2
     return sigmoid(z2)
     
