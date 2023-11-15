@@ -14,25 +14,25 @@ if not os.path.exists(base_dir):
     os.makedirs(base_dir)
 
 # Neural Network parameters
-shape = (10, 10)
+shape = (7, 7)
 batch_size = 32
 epochs = 10
 input_dim = 2 * shape[0] * shape[1]
 hidden_dim = 512
-output_dim = shape[0] * shape[1]
-learning_rate = 20
+output_dim = 1
+learning_rate = 0.1
 num_mines = 15
 
-train_input_files = sorted(glob.glob(os.path.join("datasetnew/train", 'input_*.npy')))
-train_target_files = sorted(glob.glob(os.path.join("datasetnew/train", 'target_*.npy')))
+train_input_files = sorted(glob.glob(os.path.join("datasetnewlocal/train", 'input_*.npy')))
+train_target_files = sorted(glob.glob(os.path.join("datasetnewlocal/train", 'target_*.npy')))
 assert len(train_target_files) == len(train_input_files)
 
-test_input_files = sorted(glob.glob(os.path.join("datasetnew/test", 'input_*.npy')))
-test_target_files = sorted(glob.glob(os.path.join("datasetnew/test", 'target_*.npy')))
+test_input_files = sorted(glob.glob(os.path.join("datasetnewlocal/test", 'input_*.npy')))
+test_target_files = sorted(glob.glob(os.path.join("datasetnewlocal/test", 'target_*.npy')))
 assert len(test_input_files) == len(test_target_files)
 
-val_input_files = sorted(glob.glob(os.path.join("datasetnew/val", 'input_*.npy')))
-val_target_files = sorted(glob.glob(os.path.join("datasetnew/val", 'target_*.npy')))
+val_input_files = sorted(glob.glob(os.path.join("datasetnewlocal/val", 'input_*.npy')))
+val_target_files = sorted(glob.glob(os.path.join("datasetnewlocal/val", 'target_*.npy')))
 assert len(val_input_files) == len(val_target_files)
 
 # Initialize weights
@@ -137,6 +137,7 @@ for epoch in range(epochs):
         np.save(os.path.join(epoch_dir, 'W2.npy'), W2)
         np.save(os.path.join(epoch_dir, 'b2.npy'), b2)
         tqdm.write(f"Saved model weights at epoch {epoch+1} in {epoch_dir}")
+    learning_rate *= 0.4
 
 # Save the weights after training
 np.save('W1.npy', W1)
