@@ -3,9 +3,9 @@ from tqdm import tqdm
 
 import numpy as np
 
-train = 10000
-test = 5000
-val = 5000
+train = 50000
+test = 20000
+val = 20000
 
 train_path = 'datasetnew/train/'
 test_path = 'datasetnew/test/'
