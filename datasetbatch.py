@@ -1,22 +1,33 @@
 from data_gen import gen_input_output
 from tqdm import tqdm
-
+import os
 import numpy as np
 
 train = 500
 test = 200
 val = 200
+batch_size = 32
 
 train_path = 'datasetnewbatch/train/'
 test_path = 'datasetnewbatch/test/'
 val_path = 'datasetnewbatch/val/'
+
+# Function to ensure directory exists
+def ensure_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+# Ensure that directories exist
+ensure_dir(train_path)
+ensure_dir(test_path)
+ensure_dir(val_path)
 
 for i in tqdm(range(train), desc = 'Generating train data', unit = 'data', total = train):
     # use random number of reveals from 0 to 5
     num_reveals = np.random.randint(0, 5)
     X_batch = []
     Y_batch = []
-    for t in range(8):
+    for t in range(batch_size):
         input_array, target_array = gen_input_output((10,10), 10, num_reveals = num_reveals)
         input_data = input_array.flatten()
         output_data = target_array.flatten()
@@ -34,7 +45,7 @@ for i in tqdm(range(test), desc = 'Generating test data', unit = 'data', total =
     num_reveals = np.random.randint(0, 5)
     X_batch = []
     Y_batch = []
-    for t in range(8):
+    for t in range(batch_size):
         input_array, target_array = gen_input_output((10,10), 10, num_reveals = num_reveals)
         input_data = input_array.flatten()
         output_data = target_array.flatten()
@@ -51,7 +62,7 @@ for i in tqdm(range(val), desc = 'Generating val data', unit = 'data', total = v
     num_reveals = np.random.randint(0, 5)
     X_batch = []
     Y_batch = []
-    for t in range(8):
+    for t in range(batch_size):
         input_array, target_array = gen_input_output((10,10), 10, num_reveals = num_reveals)
         input_data = input_array.flatten()
         output_data = target_array.flatten()
