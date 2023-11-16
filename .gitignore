@@ -1,6 +1,10 @@
 dataset/
+datasetnew/
+datasetnewbatch/
+datasetnewlocal/
 saved_models*/
 wandb/
+old/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
